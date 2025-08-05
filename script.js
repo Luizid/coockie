@@ -191,20 +191,105 @@ function showAchievement(name) {
     }, 5000);
 }
 
-// Salvar jogo
+// Salvar jogo com verificação e backup
 function saveGame() {
-    localStorage.setItem('cookieClickerSave', JSON.stringify(gameState));
-}
-
-// Carregar jogo
-function loadGame() {
-    const saved = localStorage.getItem('cookieClickerSave');
-    if (saved) {
-        const savedState = JSON.parse(saved);
-        gameState = { ...gameState, ...savedState };
-        updateCookiesPerSecond();
+    try {
+        const saveData = JSON.stringify(gameState);
+        
+        // Criar backup do save anterior
+        const currentSave = localStorage.getItem('cookieClickerSave');
+        if (currentSave) {
+            localStorage.setItem('cookieClickerSaveBackup', currentSave);
+        }
+        
+        // Salvar novo estado
+        localStorage.setItem('cookieClickerSave', saveData);
+        
+        // Adicionar timestamp do último save
+        localStorage.setItem('cookieClickerLastSave', new Date().toISOString());
+        
+        // Mostrar indicador visual de save
+        showSaveIndicator();
+        
+    } catch (error) {
+        console.error('Erro ao salvar jogo:', error);
     }
 }
+
+// Carregar jogo com verificação de integridade
+function loadGame() {
+    try {
+        const saved = localStorage.getItem('cookieClickerSave');
+        
+        if (!saved) {
+            // Tentar carregar backup se existir
+            const backup = localStorage.getItem('cookieClickerSaveBackup');
+            if (backup) {
+                gameState = { ...gameState, ...JSON.parse(backup) };
+                console.warn('Carregando jogo do backup');
+            }
+            return;
+        }
+        
+        const savedState = JSON.parse(saved);
+        
+        // Validar estrutura básica do save
+        if (typeof savedState.cookies === 'number' && 
+            typeof savedState.totalCookiesEarned === 'number') {
+            gameState = { ...gameState, ...savedState };
+            updateCookiesPerSecond();
+            console.log('Jogo carregado com sucesso!');
+        } else {
+            console.warn('Save corrompido, usando valores padrão');
+        }
+        
+    } catch (error) {
+        console.error('Erro ao carregar jogo:', error);
+        
+        // Tentar carregar backup
+        const backup = localStorage.getItem('cookieClickerSaveBackup');
+        if (backup) {
+            gameState = { ...gameState, ...JSON.parse(backup) };
+            console.warn('Carregando jogo do backup após erro');
+        }
+    }
+}
+
+// Indicador visual de save
+function showSaveIndicator() {
+    const indicator = document.createElement('div');
+    indicator.textContent = '💾 Salvo!';
+    indicator.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        z-index: 1000;
+        animation: fadeInOut 2s ease-in-out;
+    `;
+    
+    document.body.appendChild(indicator);
+    
+    setTimeout(() => {
+        indicator.remove();
+    }, 2000);
+}
+
+// CSS para animação do indicador
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(-10px); }
+        20% { opacity: 1; transform: translateY(0); }
+        80% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+    }
+`;
+document.head.appendChild(style);
 
 // Calcular custo de renascimento (1 milhão de cookies * multiplicador atual)
 function getRebirthCost() {
@@ -262,6 +347,17 @@ resetButton.style.borderRadius = '5px';
 resetButton.style.cursor = 'pointer';
 resetButton.addEventListener('click', resetGame);
 document.body.appendChild(resetButton);
+
+// Função para resetar o jogo
+function resetGame() {
+    if (confirm('Tem certeza que deseja resetar o jogo? Todo o progresso será perdido.')) {
+        localStorage.removeItem('cookieClickerSave');
+        localStorage.removeItem('cookieClickerSaveBackup');
+        localStorage.removeItem('cookieClickerLastSave');
+        localStorage.removeItem('cookieClickerRebirth');
+        location.reload();
+    }
+}
 
 // Iniciar o jogo
 initGame();
