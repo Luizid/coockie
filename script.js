@@ -45,20 +45,20 @@ function initGame() {
 
 // Initialize audio controls
 function initAudioControls() {
-    const musicToggle = document.getElementById('musicToggle');
     const soundToggle = document.getElementById('soundToggle');
     const volumeSlider = document.getElementById('volumeSlider');
     
-    if (musicToggle) {
-        musicToggle.addEventListener('click', () => audioManager.toggleMusic());
-    }
-    
     if (soundToggle) {
-        soundToggle.addEventListener('click', () => audioManager.toggleSound());
+        soundToggle.addEventListener('click', () => {
+            audioManager.toggleSound();
+        });
     }
     
     if (volumeSlider) {
-        volumeSlider.addEventListener('input', (e) => audioManager.setVolume(e.target.value / 100));
+        volumeSlider.addEventListener('input', (e) => {
+            audioManager.setVolume(e.target.value / 100);
+        });
+        volumeSlider.value = audioManager.volume * 100;
     }
 }
 
@@ -280,9 +280,4 @@ document.body.appendChild(resetButton);
 // Iniciar o jogo
 initGame();
 
-// Iniciar música automaticamente após carregamento
-setTimeout(() => {
-    if (typeof audioManager !== 'undefined') {
-        audioManager.playMusic();
-    }
-}, 1000);
+// Jogo iniciado sem música

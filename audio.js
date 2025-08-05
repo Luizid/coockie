@@ -1,11 +1,8 @@
-// Audio Manager for Cookie Clicker
+// Audio Manager for Cookie Clicker - Música Removida
 class AudioManager {
     constructor() {
         this.sounds = {};
-        this.music = null;
-        this.isMusicPlaying = false;
-        this.soundEnabled = true;
-        this.musicEnabled = true;
+        this.isSoundEnabled = true;
         this.volume = 0.5;
         
         this.initAudio();
@@ -20,9 +17,8 @@ class AudioManager {
             console.log('Web Audio API not supported');
         }
 
-        // Create audio elements
+        // Create sound effects only (no music)
         this.createSounds();
-        this.createMusic();
     }
 
     createSounds() {
@@ -34,15 +30,6 @@ class AudioManager {
         
         // Achievement sound
         this.sounds.achievement = this.createSound(this.getAchievementSound());
-        
-        // Hover sound
-        this.sounds.hover = this.createSound(this.getHoverSound());
-    }
-
-    createMusic() {
-        this.music = this.createSound(this.getBackgroundMusic());
-        this.music.loop = true;
-        this.music.volume = this.volume * 0.3; // Music quieter than effects
     }
 
     createSound(src) {
@@ -63,14 +50,6 @@ class AudioManager {
 
     getAchievementSound() {
         return this.generateTone(800, 0.5, 2);
-    }
-
-    getHoverSound() {
-        return this.generateTone(1200, 0.05, 20);
-    }
-
-    getBackgroundMusic() {
-        return 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
     }
 
     generateTone(frequency, duration, decay) {
@@ -95,7 +74,6 @@ class AudioManager {
         const arrayBuffer = new ArrayBuffer(44 + length * 2);
         const view = new DataView(arrayBuffer);
         
-        // WAV header
         const writeString = (offset, string) => {
             for (let i = 0; i < string.length; i++) {
                 view.setUint8(offset + i, string.charCodeAt(i));
@@ -116,7 +94,6 @@ class AudioManager {
         writeString(36, 'data');
         view.setUint32(40, length * 2, true);
         
-        // Convert float32 array to int16
         const float32Array = buffer.getChannelData(0);
         const int16Array = new Int16Array(length);
         for (let i = 0; i < length; i++) {
@@ -133,70 +110,34 @@ class AudioManager {
     }
 
     playSound(soundName) {
-        if (!this.soundEnabled || !this.sounds[soundName]) return;
+        if (!this.isSoundEnabled || !this.sounds[soundName]) return;
         
         const sound = this.sounds[soundName].cloneNode();
         sound.volume = this.volume;
         sound.play().catch(e => console.log('Error playing sound:', e));
     }
 
-    playMusic() {
-        if (!this.musicEnabled || !this.music) return;
-        
-        this.music.play().then(() => {
-            this.isMusicPlaying = true;
-            this.updateMusicButton();
-        }).catch(e => console.log('Error playing music:', e));
-    }
-
-    pauseMusic() {
-        if (this.music) {
-            this.music.pause();
-            this.isMusicPlaying = false;
-            this.updateMusicButton();
-        }
-    }
-
-    toggleMusic() {
-        if (this.isMusicPlaying) {
-            this.pauseMusic();
-        } else {
-            this.playMusic();
-        }
-    }
-
     toggleSound() {
-        this.soundEnabled = !this.soundEnabled;
+        this.isSoundEnabled = !this.isSoundEnabled;
         this.updateSoundButton();
         this.saveSettings();
     }
 
     setVolume(volume) {
         this.volume = Math.max(0, Math.min(1, volume));
-        if (this.music) {
-            this.music.volume = this.volume * 0.3;
-        }
         this.saveSettings();
-    }
-
-    updateMusicButton() {
-        const musicBtn = document.getElementById('musicToggle');
-        if (musicBtn) {
-            musicBtn.textContent = this.isMusicPlaying ? '🔊' : '🔇';
-        }
     }
 
     updateSoundButton() {
         const soundBtn = document.getElementById('soundToggle');
         if (soundBtn) {
-            soundBtn.textContent = this.soundEnabled ? '🔊' : '🔇';
+            soundBtn.textContent = this.isSoundEnabled ? '🔊' : '🔇';
         }
     }
 
     saveSettings() {
         const settings = {
-            soundEnabled: this.soundEnabled,
-            musicEnabled: this.musicEnabled,
+            soundEnabled: this.isSoundEnabled,
             volume: this.volume
         };
         localStorage.setItem('audioSettings', JSON.stringify(settings));
@@ -206,8 +147,7 @@ class AudioManager {
         const saved = localStorage.getItem('audioSettings');
         if (saved) {
             const settings = JSON.parse(saved);
-            this.soundEnabled = settings.soundEnabled !== undefined ? settings.soundEnabled : true;
-            this.musicEnabled = settings.musicEnabled !== undefined ? settings.musicEnabled : true;
+            this.isSoundEnabled = settings.soundEnabled !== undefined ? settings.soundEnabled : true;
             this.volume = settings.volume !== undefined ? settings.volume : 0.5;
         }
     }
