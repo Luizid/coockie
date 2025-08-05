@@ -12,7 +12,9 @@ let gameState = {
     },
     achievements: [],
     totalCookiesEarned: 0,
-    playerName: ''
+    playerName: '',
+    rebirths: 0,
+    rebirthMultiplier: 1
 };
 
 // Elementos DOM
@@ -21,7 +23,6 @@ const cookiesDisplay = document.getElementById('cookies');
 const cpsDisplay = document.getElementById('cps');
 const clickEffect = document.getElementById('clickEffect');
 const achievementList = document.getElementById('achievementList');
-const leaderboardBody = document.getElementById('leaderboardBody');
 
 // Inicializar o jogo
 function initGame() {
@@ -62,47 +63,6 @@ function initAudioControls() {
     }
 }
 
-// Atualizar tabela de classificação
-function updateLeaderboard() {
-    let leaderboard = JSON.parse(localStorage.getItem('cookieClickerLeaderboard')) || [];
-    
-    // Atualizar ou adicionar jogador atual
-    const existingIndex = leaderboard.findIndex(p => p.name === gameState.playerName);
-    if (existingIndex >= 0) {
-        leaderboard[existingIndex].cookies = gameState.cookies;
-        leaderboard[existingIndex].cps = gameState.cookiesPerSecond;
-    } else {
-        leaderboard.push({
-            name: gameState.playerName,
-            cookies: gameState.cookies,
-            cps: gameState.cookiesPerSecond
-        });
-    }
-    
-    // Ordenar por cookies decrescente
-    leaderboard.sort((a, b) => b.cookies - a.cookies);
-    
-    // Manter top 10
-    leaderboard = leaderboard.slice(0, 10);
-    
-    // Salvar no localStorage
-    localStorage.setItem('cookieClickerLeaderboard', JSON.stringify(leaderboard));
-    
-    // Atualizar tabela HTML
-    if (leaderboardBody) {
-        leaderboardBody.innerHTML = '';
-        leaderboard.forEach((player, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${player.name}</td>
-                <td>${formatNumber(player.cookies)}</td>
-                <td>${formatNumber(player.cps)}</td>
-            `;
-            leaderboardBody.appendChild(row);
-        });
-    }
-}
 
 // Atualizar display
 function updateDisplay() {
@@ -134,8 +94,9 @@ function formatNumber(num) {
 
 // Clicar no cookie
 cookieElement.addEventListener('click', (e) => {
-    gameState.cookies += gameState.clickPower;
-    gameState.totalCookiesEarned += gameState.clickPower;
+    const clickValue = gameState.clickPower * gameState.rebirthMultiplier;
+    gameState.cookies += clickValue;
+    gameState.totalCookiesEarned += clickValue;
     
     // Play click sound
     audioManager.playSound('click');
@@ -147,7 +108,7 @@ cookieElement.addEventListener('click', (e) => {
     
     const effect = document.createElement('div');
     effect.className = 'click-effect';
-    effect.textContent = `+${gameState.clickPower}`;
+    effect.textContent = `+${formatNumber(clickValue)}`;
     effect.style.left = x + 'px';
     effect.style.top = y + 'px';
     
@@ -187,7 +148,7 @@ function updateCookiesPerSecond() {
     Object.keys(gameState.buildings).forEach(building => {
         const count = gameState.buildings[building].count;
         const production = gameState.buildings[building].baseProduction;
-        gameState.cookiesPerSecond += count * production;
+        gameState.cookiesPerSecond += count * production * gameState.rebirthMultiplier;
     });
 }
 
@@ -245,11 +206,36 @@ function loadGame() {
     }
 }
 
-// Resetar jogo
-function resetGame() {
-    if (confirm('Tem certeza que deseja resetar o jogo?')) {
+// Calcular custo de renascimento (1 milhão de cookies * multiplicador atual)
+function getRebirthCost() {
+    return 1000000 * Math.pow(10, gameState.rebirths);
+}
+
+// Renascimento - resetar progresso mas ganhar multiplicador permanente
+function rebirthGame() {
+    const rebirthCost = getRebirthCost();
+    
+    if (gameState.totalCookiesEarned < rebirthCost) {
+        alert(`Você precisa de ${formatNumber(rebirthCost)} cookies totais para renascer!\nAtualmente: ${formatNumber(gameState.totalCookiesEarned)}`);
+        return;
+    }
+    
+    const newMultiplier = gameState.rebirthMultiplier * 2;
+    const rebirthCount = gameState.rebirths + 1;
+    
+    if (confirm(`Deseja renascer?\n\nBenefícios:\n• Multiplicador permanente: ${newMultiplier}x\n• Renascimentos: ${rebirthCount}\n\nCusto: ${formatNumber(rebirthCost)} cookies totais\n\nIsso resetará todo seu progresso!`)) {
+        // Salvar apenas dados de renascimento
+        const rebirthData = {
+            rebirths: rebirthCount,
+            rebirthMultiplier: newMultiplier,
+            playerName: gameState.playerName
+        };
+        
+        // Resetar jogo mas manter dados de renascimento
         localStorage.removeItem('cookieClickerSave');
         localStorage.removeItem('cookieClickerLeaderboard');
+        localStorage.setItem('cookieClickerRebirth', JSON.stringify(rebirthData));
+        
         location.reload();
     }
 }
