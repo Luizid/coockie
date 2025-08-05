@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Clicker - Jogo de Cliques</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>🍪 Cookie Clicker</h1>
+            <div class="stats">
+                <div class="stat">
+                    <span class="label">Cookies:</span>
+                    <span id="cookies" class="value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Por Segundo:</span>
+                    <span id="cps" class="value">0</span>
+                </div>
+            </div>
+            <div class="audio-controls">
+                <button id="musicToggle" class="audio-btn" title="Música">🎵</button>
+                <button id="soundToggle" class="audio-btn" title="Sons">🔊</button>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider" title="Volume">
+            </div>
+        </header>
+
+        <main>
+            <div class="click-section">
+                <div id="cookie" class="cookie">🍪</div>
+                <div class="click-effect" id="clickEffect"></div>
+            </div>
+
+            <div class="shop">
+                <h2>Loja de Upgrades</h2>
+                <div class="shop-items">
+                    <div class="shop-item" id="cursor">
+                        <div class="item-info">
+                            <span class="item-name">👆 Cursor</span>
+                            <span class="item-cost">Custo: <span id="cursorCost">15</span> cookies</span>
+                        </div>
+                        <div class="item-count">
+                            <span id="cursorCount">0</span>
+                        </div>
+                    </div>
+
+                    <div class="shop-item" id="grandma">
+                        <div class="item-info">
+                            <span class="item-name">👵 Vovó</span>
+                            <span class="item-cost">Custo: <span id="grandmaCost">100</span> cookies</span>
+                        </div>
+                        <div class="item-count">
+                            <span id="grandmaCount">0</span>
+                        </div>
+                    </div>
+
+                    <div class="shop-item" id="farm">
+                        <div class="item-info">
+                            <span class="item-name">🏭 Fábrica</span>
+                            <span class="item-cost">Custo: <span id="farmCost">1100</span> cookies</span>
+                        </div>
+                        <div class="item-count">
+                            <span id="farmCount">0</span>
+                        </div>
+                    </div>
+
+                    <div class="shop-item" id="mine">
+                        <div class="item-info">
+                            <span class="item-name">⛏️ Mina</span>
+                            <span class="item-cost">Custo: <span id="mineCost">12000</span> cookies</span>
+                        </div>
+                        <div class="item-count">
+                            <span id="mineCount">0</span>
+                        </div>
+                    </div>
+
+                    <div class="shop-item" id="factory">
+                        <div class="item-info">
+                            <span class="item-name">🏢 Indústria</span>
+                            <span class="item-cost">Custo: <span id="factoryCost">130000</span> cookies</span>
+                        </div>
+                        <div class="item-count">
+                            <span id="factoryCount">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="achievements">
+            <h3>Conquistas</h3>
+            <div id="achievementList"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
