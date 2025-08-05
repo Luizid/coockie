@@ -122,6 +122,9 @@ function buyBuilding(building) {
         gameState.buildings[building].count++;
         updateCookiesPerSecond();
         updateDisplay();
+        
+        // Play purchase sound
+        audioManager.playSound('purchase');
     }
 }
 
@@ -220,5 +223,115 @@ resetButton.style.cursor = 'pointer';
 resetButton.addEventListener('click', resetGame);
 document.body.appendChild(resetButton);
 
+// Estado do jogo
+let gameState = {
+    cookies: 0,
+    cookiesPerSecond: 0,
+    clickPower: 1,
+    buildings: {
+        cursor: { count: 0, baseCost: 15, baseProduction: 0.1 },
+        grandma: { count: 0, baseCost: 100, baseProduction: 1 },
+        farm: { count: 0, baseCost: 1100, baseProduction: 8 },
+        mine: { count: 0, baseCost: 12000, baseProduction: 47 },
+        factory: { count: 0, baseCost: 130000, baseProduction: 260 }
+    },
+    achievements: [],
+    totalCookiesEarned: 0,
+    playerName: ''
+};
+
+// Elementos DOM
+const cookieElement = document.getElementById('cookie');
+const cookiesDisplay = document.getElementById('cookies');
+const cpsDisplay = document.getElementById('cps');
+const clickEffect = document.getElementById('clickEffect');
+const achievementList = document.getElementById('achievementList');
+const leaderboardBody = document.getElementById('leaderboardBody');
+
+// Inicializar o jogo
+function initGame() {
+    loadGame();
+    if (!gameState.playerName) {
+        gameState.playerName = prompt("Digite seu nome de jogador:");
+        saveGame();
+    }
+    updateDisplay();
+    updateLeaderboard();
+    setInterval(produceCookies, 1000);
+    setInterval(saveGame, 10000);
+    
+    // Initialize audio controls
+    initAudioControls();
+}
+
+// Atualizar tabela de classificação
+function updateLeaderboard() {
+    let leaderboard = JSON.parse(localStorage.getItem('cookieClickerLeaderboard')) || [];
+    
+    // Atualizar ou adicionar jogador atual
+    const existingIndex = leaderboard.findIndex(p => p.name === gameState.playerName);
+    if (existingIndex >= 0) {
+        leaderboard[existingIndex].cookies = gameState.cookies;
+        leaderboard[existingIndex].cps = gameState.cookiesPerSecond;
+    } else {
+        leaderboard.push({
+            name: gameState.playerName,
+            cookies: gameState.cookies,
+            cps: gameState.cookiesPerSecond
+        });
+    }
+    
+    // Ordenar por cookies decrescente
+    leaderboard.sort((a, b) => b.cookies - a.cookies);
+    
+    // Manter top 10
+    leaderboard = leaderboard.slice(0, 10);
+    
+    // Salvar no localStorage
+    localStorage.setItem('cookieClickerLeaderboard', JSON.stringify(leaderboard));
+    
+    // Atualizar tabela HTML
+    leaderboardBody.innerHTML = '';
+    leaderboard.forEach((player, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${player.name}</td>
+            <td>${formatNumber(player.cookies)}</td>
+            <td>${formatNumber(player.cps)}</td>
+        `;
+        leaderboardBody.appendChild(row);
+    });
+}
+
+// Atualizar display
+function updateDisplay() {
+    cookiesDisplay.textContent = formatNumber(gameState.cookies);
+    cpsDisplay.textContent = formatNumber(gameState.cookiesPerSecond);
+    
+    // Atualizar custos e contagens
+    Object.keys(gameState.buildings).forEach(building => {
+        const costElement = document.getElementById(`${building}Cost`);
+        const countElement = document.getElementById(`${building}Count`);
+        if (costElement && countElement) {
+            costElement.textContent = formatNumber(getBuildingCost(building));
+            countElement.textContent = gameState.buildings[building].count;
+        }
+    });
+    
+    // Verificar conquistas
+    checkAchievements();
+    
+    // Atualizar leaderboard
+    updateLeaderboard();
+}
+
+// ... restante do código permanece inalterado ...
+
 // Iniciar o jogo
 initGame();
+
+// Iniciar música automaticamente após carregamento
+setTimeout(() => {
+    audioManager.playMusic();
+}, 1000);
