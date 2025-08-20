@@ -3,101 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cookie Clicker - Jogo de Cliques</title>
+    <title>Pizza Clicker</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="rebirth-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Impact&family=Georgia&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Tela do Jogo -->
-    <div id="gameScreen" class="game-container">
+    <div class="game-container">
         <header>
-            <h1>🍪 Cookie Clicker</h1>
+            <h1>Pizza Clicker</h1>
             <div class="stats">
                 <div class="stat">
-                    <span class="label">Cookies:</span>
-                    <span id="cookies" class="value">0</span>
+                    <span class="stat-label">Pizzas:</span>
+                    <span id="pizza-count" class="stat-value">0</span>
                 </div>
                 <div class="stat">
-                    <span class="label">Por Segundo:</span>
-                    <span id="cps" class="value">0</span>
+                    <span class="stat-label">PPS:</span>
+                    <span id="pps" class="stat-value">0</span>
                 </div>
-            </div>
-            <div class="audio-controls">
-                <button id="soundToggle" class="audio-btn" title="Sons">🔊</button>
-                <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider" title="Volume">
             </div>
         </header>
 
         <main>
-            <div class="click-section">
-                <div id="cookie" class="cookie">🍪</div>
-                <div class="click-effect" id="clickEffect"></div>
-            </div>
-
-            <div class="shop">
-                <h2>Loja de Upgrades</h2>
-                <div class="shop-items">
-                    <div class="shop-item" id="cursor">
-                        <div class="item-info">
-                            <span class="item-name">👆 Cursor</span>
-                            <span class="item-cost">Custo: <span id="cursorCost">15</span> cookies</span>
-                        </div>
-                        <div class="item-count">
-                            <span id="cursorCount">0</span>
-                        </div>
+            <div class="game-area">
+                <div class="pizza-section">
+                    <div class="pizza-container">
+                        <img id="pizza" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='90' fill='%23FFD700' stroke='%23FF8C00' stroke-width='5'/%3E%3Ccircle cx='100' cy='100' r='70' fill='%23FF6347'/%3E%3Ccircle cx='80' cy='80' r='8' fill='%23FFF'/%3E%3Ccircle cx='120' cy='90' r='8' fill='%23FFF'/%3E%3Ccircle cx='90' cy='110' r='8' fill='%23FFF'/%3E%3Ccircle cx='110' cy='120' r='8' fill='%23FFF'/%3E%3C/svg%3E" alt="Pizza" class="pizza-image">
+                        <div class="pizza-glow"></div>
                     </div>
-
-                    <div class="shop-item" id="grandma">
-                        <div class="item-info">
-                            <span class="item-name">👵 Vovó</span>
-                            <span class="item-cost">Custo: <span id="grandmaCost">100</span> cookies</span>
-                        </div>
-                        <div class="item-count">
-                            <span id="grandmaCount">0</span>
-                        </div>
+                    <div class="pizza-counter">
+                        <span id="pizza-counter">0</span>
+                        <span>pizzas</span>
                     </div>
+                </div>
 
-                    <div class="shop-item" id="farm">
-                        <div class="item-info">
-                            <span class="item-name">🏭 Fábrica</span>
-                            <span class="item-cost">Custo: <span id="farmCost">1100</span> cookies</span>
+                <div class="upgrades-section">
+                    <h2>Loja</h2>
+                    <div class="upgrades-container">
+                        <div class="upgrade" data-upgrade="cursor">
+                            <div class="upgrade-icon">👆</div>
+                            <div class="upgrade-info">
+                                <div class="upgrade-name">Mão Mais Rápida</div>
+                                <div class="upgrade-cost">Cost: <span id="cursor-cost">15</span> pizzas</div>
+                                <div class="upgrade-owned">Owned: <span id="cursor-owned">0</span></div>
+                            </div>
                         </div>
-                        <div class="item-count">
-                            <span id="farmCount">0</span>
-                        </div>
-                    </div>
 
-                    <div class="shop-item" id="mine">
-                        <div class="item-info">
-                            <span class="item-name">⛏️ Mina</span>
-                            <span class="item-cost">Custo: <span id="mineCost">12000</span> cookies</span>
+                        <div class="upgrade" data-upgrade="oven">
+                            <div class="upgrade-icon">🔥</div>
+                            <div class="upgrade-info">
+                                <div class="upgrade-name">Forno de Pizza</div>
+                                <div class="upgrade-cost">Cost: <span id="oven-cost">100</span> pizzas</div>
+                                <div class="upgrade-owned">Owned: <span id="oven-owned">0</span></div>
+                            </div>
                         </div>
-                        <div class="item-count">
-                            <span id="mineCount">0</span>
-                        </div>
-                    </div>
 
-                    <div class="shop-item" id="factory">
-                        <div class="item-info">
-                            <span class="item-name">🏢 Indústria</span>
-                            <span class="item-cost">Custo: <span id="factoryCost">130000</span> cookies</span>
+                        <div class="upgrade" data-upgrade="chef">
+                            <div class="upgrade-icon">👨‍🍳</div>
+                            <div class="upgrade-info">
+                                <div class="upgrade-name">Chef Profissional</div>
+                                <div class="upgrade-cost">Cost: <span id="chef-cost">500</span> pizzas</div>
+                                <div class="upgrade-owned">Owned: <span id="chef-owned">0</span></div>
+                            </div>
                         </div>
-                        <div class="item-count">
-                            <span id="factoryCount">0</span>
+
+                        <div class="upgrade" data-upgrade="factory">
+                            <div class="upgrade-icon">🏭</div>
+                            <div class="upgrade-info">
+                                <div class="upgrade-name">Fábrica de Pizzas</div>
+                                <div class="upgrade-cost">Cost: <span id="factory-cost">2000</span> pizzas</div>
+                                <div class="upgrade-owned">Owned: <span id="factory-owned">0</span></div>
+                            </div>
+                        </div>
+
+                        <div class="upgrade" data-upgrade="portal">
+                            <div class="upgrade-icon">🌀</div>
+                            <div class="upgrade-info">
+                                <div class="upgrade-name">Portal de Pizzas</div>
+                                <div class="upgrade-cost">Cost: <span id="portal-cost">10000</span> pizzas</div>
+                                <div class="upgrade-owned">Owned: <span id="portal-owned">0</span></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <div class="achievements">
-            <h3>Conquistas</h3>
-            <div id="achievementList"></div>
-        </div>
-        
-        <!-- Sistema de classificação removido -->
+        <div class="floating-pizza" id="floating-pizza">+1</div>
     </div>
 
-    <script src="audio.js"></script>
+    <script src="rebirth-system.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
